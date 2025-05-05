@@ -4,10 +4,10 @@
 #include "freertos/task.h"
 #include <stdio.h>
 
-#define IN1_PIN 37
-#define IN2_PIN 38
-#define IN3_PIN 39
-#define IN4_PIN 40
+#define IN1_PIN 9
+#define IN2_PIN 10
+#define IN3_PIN 11
+#define IN4_PIN 12
 
 static const char* TAG = "motor_task";
 
@@ -58,8 +58,8 @@ void rotate_motor(int steps, int direction, int delay_ms)
 // 电机任务：每 3 秒顺时针 -> 逆时针旋转一圈
 void motor_task(void* pvParameters)
 {
-    int delay_per_step_ms = 3; // 每步延迟 3ms
-    int steps_per_cycle = 512; // 一圈512步
+    int delay_per_step_ms = 30; // 每步延迟 3ms
+    int steps_per_cycle = 30; // 一圈512步
 
     while (1) {
         ESP_LOGI(TAG, "Clockwise");
