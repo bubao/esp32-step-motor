@@ -50,7 +50,7 @@ void rotate_motor(int steps, int direction, int delay_ms)
     for (int i = 0; i < steps; i++) {
         int step = direction == 1 ? i % 8 : (7 - i % 8);
         set_step(step);
-        printf("Step %d: IN1=%d, IN2=%d, IN3=%d, IN4=%d\n", step, stepSequence[step][0], stepSequence[step][1], stepSequence[step][2], stepSequence[step][3]);
+        // printf("Step %d: IN1=%d, IN2=%d, IN3=%d, IN4=%d\n", step, stepSequence[step][0], stepSequence[step][1], stepSequence[step][2], stepSequence[step][3]);
         vTaskDelay(pdMS_TO_TICKS(delay_ms));
     }
 }
@@ -58,19 +58,19 @@ void rotate_motor(int steps, int direction, int delay_ms)
 // 电机任务：每 3 秒顺时针 -> 逆时针旋转一圈
 void motor_task(void* pvParameters)
 {
-    int delay_per_step_ms = 30; // 每步延迟 3ms
-    int steps_per_cycle = 30; // 一圈512步
+    int delay_per_step_ms = 10; // 每步延迟 3ms
+    int steps_per_cycle = 512; // 一圈512步
 
     while (1) {
-        ESP_LOGI(TAG, "Clockwise");
+        // ESP_LOGI(TAG, "Clockwise");
         rotate_motor(steps_per_cycle, 1, delay_per_step_ms);
 
-        vTaskDelay(pdMS_TO_TICKS(3000));
+        // vTaskDelay(pdMS_TO_TICKS(10));
 
-        ESP_LOGI(TAG, "Counterclockwise");
-        rotate_motor(steps_per_cycle, 0, delay_per_step_ms);
+        // ESP_LOGI(TAG, "Counterclockwise");
+        // rotate_motor(steps_per_cycle, 0, delay_per_step_ms);
 
-        vTaskDelay(pdMS_TO_TICKS(3000));
+        // vTaskDelay(pdMS_TO_TICKS(3000));
     }
 }
 
