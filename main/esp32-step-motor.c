@@ -76,7 +76,7 @@ void init_motor_timer()
     };
     timer_init(TIMER_GROUP, TIMER_INDEX, &config);
     timer_set_counter_value(TIMER_GROUP, TIMER_INDEX, 0);
-    timer_set_alarm_value(TIMER_GROUP, TIMER_INDEX, 2000); // 每 2ms 步进一次
+    timer_set_alarm_value(TIMER_GROUP, TIMER_INDEX, 5000); // 每 5ms 步进一次
     timer_enable_intr(TIMER_GROUP, TIMER_INDEX);
     timer_isr_callback_add(TIMER_GROUP, TIMER_INDEX, on_timer_isr, NULL, 0);
     timer_start(TIMER_GROUP, TIMER_INDEX); // 启动计时器
