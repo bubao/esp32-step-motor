@@ -1,5 +1,5 @@
 #include "driver/gpio.h"
-#include "driver/timer.h"
+#include "driver/gptimer.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
@@ -10,8 +10,6 @@
 #define IN3_PIN 11
 #define IN4_PIN 12
 #define BUTTON_PIN GPIO_NUM_0
-#define TIMER_GROUP TIMER_GROUP_0
-#define TIMER_INDEX TIMER_0
 
 static const char* TAG = "motor";
 
@@ -52,7 +50,7 @@ void gpio_init()
     gpio_config(&io_conf);
 }
 
-static bool IRAM_ATTR on_timer_isr(void* args)
+static bool IRAM_ATTR on_timer_isr(gptimer_handle_t timer, const gptimer_alarm_event_data_t* edata, void* user_data)
 {
     if (direction != 0) {
         step_index += direction;
@@ -67,19 +65,32 @@ static bool IRAM_ATTR on_timer_isr(void* args)
 
 void init_motor_timer()
 {
-    timer_config_t config = {
-        .divider = 80, // 1us per tick
-        .counter_dir = TIMER_COUNT_UP,
-        .counter_en = TIMER_PAUSE, // 初始化先暂停
-        .alarm_en = TIMER_ALARM_EN,
-        .auto_reload = true
+    gptimer_handle_t gptimer = NULL;
+    gptimer_config_t timer_config = {
+        .clk_src = GPTIMER_CLK_SRC_DEFAULT,
+        .direction = GPTIMER_COUNT_UP,
+        .resolution_hz = 1000000, // 1MHz, 1 tick = 1us
     };
-    timer_init(TIMER_GROUP, TIMER_INDEX, &config);
-    timer_set_counter_value(TIMER_GROUP, TIMER_INDEX, 0);
-    timer_set_alarm_value(TIMER_GROUP, TIMER_INDEX, 5000); // 每 5ms 步进一次
-    timer_enable_intr(TIMER_GROUP, TIMER_INDEX);
-    timer_isr_callback_add(TIMER_GROUP, TIMER_INDEX, on_timer_isr, NULL, 0);
-    timer_start(TIMER_GROUP, TIMER_INDEX); // 启动计时器
+
+    ESP_ERROR_CHECK(gptimer_new_timer(&timer_config, &gptimer));
+
+    gptimer_alarm_config_t alarm_config = {
+        .reload_count = 0,
+        .alarm_count = 5000, // 5ms
+        .flags.auto_reload_on_alarm = true,
+    };
+    ESP_ERROR_CHECK(gptimer_set_alarm_action(gptimer, &alarm_config));
+
+    ESP_ERROR_CHECK(
+        gptimer_register_event_callbacks(
+            gptimer,
+            &(gptimer_event_callbacks_t) {
+                .on_alarm = on_timer_isr,
+            },
+            NULL));
+
+    ESP_ERROR_CHECK(gptimer_enable(gptimer)); // 启用定时器
+    ESP_ERROR_CHECK(gptimer_start(gptimer)); // 启动定时器
     ESP_LOGI(TAG, "Timer started");
 }
 
