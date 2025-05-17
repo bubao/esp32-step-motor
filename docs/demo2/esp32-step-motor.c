@@ -124,7 +124,7 @@ void init_motor_timer()
 
     gptimer_alarm_config_t alarm_config = {
         .reload_count = 0,
-        .alarm_count = 5000, // 5ms
+        .alarm_count = 1000, // 1ms
         .flags.auto_reload_on_alarm = true,
     };
     ESP_ERROR_CHECK(gptimer_set_alarm_action(gptimer, &alarm_config));

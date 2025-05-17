@@ -96,14 +96,16 @@ void init_motor_timer()
 
     gptimer_alarm_config_t alarm_config = {
         .reload_count = 0,
-        .alarm_count = 5000, // 5ms
+        .alarm_count = 1000, // 1ms
         .flags.auto_reload_on_alarm = true,
     };
     ESP_ERROR_CHECK(gptimer_set_alarm_action(gptimer, &alarm_config));
 
-    ESP_ERROR_CHECK(gptimer_register_event_callbacks(gptimer, &(gptimer_event_callbacks_t) {
-                                                                  .on_alarm = on_timer_isr,
-                                                              },
+    ESP_ERROR_CHECK(gptimer_register_event_callbacks(
+        gptimer,
+        &(gptimer_event_callbacks_t) {
+            .on_alarm = on_timer_isr,
+        },
         NULL));
 
     ESP_ERROR_CHECK(gptimer_enable(gptimer)); // 启用定时器
